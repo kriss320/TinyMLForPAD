@@ -160,9 +160,9 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
 
 if __name__ == '__main__':
     # Path for the training images
-    training_dataset_path = "Synth+msu"
+    training_dataset_path = ""
     # Path for the unseen testing images
-    unseen_testing_dataset_path = "siwimg"
+    unseen_testing_dataset_path = ""
     # Set device to GPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -246,8 +246,3 @@ if __name__ == '__main__':
                     stopped_epoch = epoch + 1
                     print("Early stopping triggered at epoch:", epoch + 1)
                     break
-            # calulate the performance of the final model
-            optimal_threshold, accuracy, apcer, bpcer = find_optimal_threshold(model, test_dataloader, device)
-            unseen_optimal_threshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(model, unseen_test_dataloader, device)
-            model_path = f"Trainded-{apcer*100}_BPCE{bpcer*100}_EPOCH{stopped_epoch}_lr{lerningrate}_decay{wd}_{timestr}.pth"
-            torch.save(model.state_dict(), model_path)

@@ -190,7 +190,7 @@ def main():
     # Load Pre-Trained Teacher Model (EfficientNet-B1)
     teacher_model = timm.create_model('efficientnet_b1', pretrained=False)
     teacher_model.classifier = nn.Sequential(nn.Dropout(0.5), nn.Linear(1280, 1), nn.Sigmoid())
-    teacher_model.load_state_dict(torch.load("models/B1/synt+siw/trained_synthandsiw_timm_efficientnet_b1_stepLR_epoch1_total_unseen_accuracy0.9428571428571428_APCER0.02857142857142857_BPCER0.08571428571428572_-with-transform_lr0.0001_decay0.0001_2025-02-13.pth"))
+    teacher_model.load_state_dict(torch.load("model.pth"))
     teacher_model.to(device)
     teacher_model.eval()  # Freeze the teacher model
 
@@ -219,7 +219,9 @@ def main():
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-
+        best_threshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(student_model, test_dataloader, device)
+        if unseen_bpcer < 0.5:
+            torch.save(student_model.state_dict(), f"student_model_{timestr}_epoch{epoch}_apcer{unseen_apcer}_bpcer{unseen_bpcer}.pth")
         avg_train_loss = running_loss / len(train_dataloader)
         # Test the student model on the evaluation dataset
         print("\nStudent Model Threshold Testing:")
@@ -228,9 +230,6 @@ def main():
         print(f"  Training Loss: {avg_train_loss:.4f}")
         print(f"  Student Model - Optimal Threshold: {best_threshold:.4f}")
         print(f"  Student Model - Accuracy: {unseen_accuracy:.2f}, APCER: {unseen_apcer:.2f}, BPCER: {unseen_bpcer:.2f}")
-
-    # Save Student Model
-    torch.save(student_model.state_dict(), f"models/B0/synth+siw/knowledge/student_model_{timestr}.pth")
 
 if __name__ == "__main__":
     main()

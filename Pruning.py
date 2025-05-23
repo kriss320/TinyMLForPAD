@@ -241,13 +241,13 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001,uns
         # Store the results in a log file, mainly for debuging purposes
         if unseen_accuracy > best_unseen_accuracy and unseen_accuracy > 0.6:
             with open("pruning.log", 'a') as log:
-                log.write(f"Pruned  {prune_amount *100:.2f}% of weights tested unseen msu ,  epochs -> Accuracy: {unseen_accuracy:.6f}, APCER: {unseen_apcer:.6f}, BPCER: {unseen_bpcer:.6f}, params {params}, zero params {zero_params}, sparcity {sparcity}\n")
+                log.write(f"Pruned  {prune_amount *100:.2f}% of weights tested unseen dataset ,  epochs -> Accuracy: {unseen_accuracy:.6f}, APCER: {unseen_apcer:.6f}, BPCER: {unseen_bpcer:.6f}, params {params}, zero params {zero_params}, sparcity {sparcity}\n")
                 log.write("\n")
                 log.write("\n")
 
         # Store the model if the accuracy is better than the previous one and 
         if unseen_accuracy > best_unseen_accuracy and unseen_apcer < 0.5:
-            model_path_temp = model_path + f"_epoch{epoch+1}_pruned-{prune_amount}_sparcity-{sparcity:.2f}_unseen_apcer-{unseen_apcer:.2f}_unseen_bpcer-{unseen_bpcer:.2f}_unseen_accuracy-{unseen_accuracy:.2f}.pth"
+            model_path_temp = model_path + f"model_name.pth"
             best_unseen_accuracy = unseen_accuracy
             torch.save(model.state_dict(), model_path_temp)
 
@@ -293,7 +293,7 @@ if __name__ == '__main__':
             )
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             model.to(device)
-            model.load_state_dict(torch.load("models/B0/synth+msu/knowledge_lr=0.0001/student_model_2025-04-08_epoch8_apcer0.10294117647058823_bpcer0.17086834733893558.pth", weights_only=True, map_location=torch.device(device)))
+            model.load_state_dict(torch.load("model.pth", weights_only=True, map_location=torch.device(device)))
             model.train()
 
 
@@ -308,7 +308,7 @@ if __name__ == '__main__':
             freeze_conv_layers(model)
             calculate_sparsity(model)
             # Fine-tune the model after pruning
-            fine_tune_model(model, train_dataloader, device, num_epochs=15,unseen_dataloader=unseen_dataloader,prune_amount=prune_amount, model_path="./models/B0/synth+msu/knowledge_lr=0.0001/pruned/student_model_synth+msu")
+            fine_tune_model(model, train_dataloader, device, num_epochs=15,unseen_dataloader=unseen_dataloader,prune_amount=prune_amount, model_path="Insert_path")
             
             params, zero_params, sparcity = calculate_sparsity(model)
             # Measure performance after fine-tuning
