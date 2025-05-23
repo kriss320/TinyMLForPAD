@@ -49,9 +49,21 @@ class CustomImageDataset(Dataset):
         return image, classification
     
 
-# Function to compute the APCER and BPCER with a threshold.
-# 
+
 def compute_apcer_bpcer(predictions, labels, threshold=0.5):
+    '''
+    Function to compute the APCER and BPCER with a threshold.
+    Is used by other functions such as find_optimal_threshold
+
+    Parameters
+    Predictions: np.array of the predictions the model has made
+    labels: np.array of the actuall labels of the images
+    threshold= the threshold where images are classified as Bona fide or PAs
+
+    returns:
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
     # Make a binary prediction based on the threshold
     prediction = (predictions >= threshold).astype(int)
     # Count errors 
@@ -66,10 +78,28 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     return apcer, bpcer
 
 
-# Function to Test the Loaded Model to find the optimal threshold
-# Has implemented caching to reduce time spent trying to find the optimal threshold
-# requires compute_apcer_bpcer to do the actual computation of the cached predictions
+
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
+    '''
+    Function to Test the Loaded Model to find the optimal threshold
+    Has implemented caching to reduce time spent trying to find the optimal threshold
+    uses a simple binary search method to find the optimal threshold, could be optimized using a smarter search
+
+    Parameters:
+    model: the model which will be used
+    dataloader: the dataloader with the images for testing
+    device: the device the model and dataloader will be run on
+    target_apcer: the apcer which the threshold will be changed to reach
+    precision: the precision needed in the apcer before stoping
+
+    returns:
+    optimal_threshold: the threshold where the apcer is met
+    accuracy: the total classification accuracy at the threshold
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
+
+
     # Compute all predictions once
     model.eval()
     all_predictions, all_labels = [], []
@@ -111,7 +141,21 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     accuracy = np.mean(predicted_labels == all_labels)
 
     return optimal_threshold, accuracy, apcer, bpcer
+
+
 def calculate_sparsity(model):
+    '''
+    Since weights are set to 0 in pytorch instead of removed sparsity is needed 
+    Sparcity is an alternative metric to removed weights, but is a count of the weights that are set to 0
+    
+    Parameters: 
+    model: the model which the calculations will be performed on.
+
+    Returns: 
+    total_params: the total parameter count of the model
+    zero_params: the amount of parameters that are zero
+    sparcity: the percentage of parameters that are zero
+    '''
     total_params = 0
     zero_params = 0
 
@@ -130,6 +174,18 @@ def calculate_sparsity(model):
     return total_params, zero_params, sparsity
 
 def prune_model(model, prune_amount):
+    '''
+    Defenition of pruning method. will only prune Conv2d layers and linear layers. 
+    Only Conv2d is needed when pruning EfficientNet
+
+    Parameters:
+    model: the model the pruning is performed on
+    prune_amount: the percentage of weights that are to be removed in the layers
+
+    Returns:
+    model: the pruned model
+    '''
+
     for name, module in model.named_modules():
         if isinstance(module, torch.nn.Conv2d):  # Prune Conv2d layers
             prune.l1_unstructured(module, name='weight', amount=prune_amount)
@@ -141,10 +197,17 @@ def prune_model(model, prune_amount):
 
 
 
-#The three fuctions below are used to freeze the weights of the layers in the model, and to not add them to the calculations
-#thay are inspired by the pytorch forum post:
-#https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7
+
 def freeze_conv_layers(model):
+    '''
+    Used to freeze the weights of the convolutional layers in the model so they are not changed during finetuning
+    Inspired by the pytorch forum post:
+    https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7
+    
+    Parameters: 
+    model: the model which will get frozen layers
+
+    '''
     # Iterate over the model's layers
     for name, module in model.named_modules():
         if isinstance(module, torch.nn.Conv2d):
@@ -155,6 +218,15 @@ def freeze_conv_layers(model):
             print(f"Frozen {name}.weight and {name}.bias")
 #not much use for this one in the efficientnet model, but it is here for other models
 def freeze_fc_layers(model):
+    '''
+    Used to freeze the weights of the fully connected layers in the model so they are not changed during finetuning
+    Inspired by the pytorch forum post:
+    https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7
+    
+    Parameters: 
+    model: the model which will get frozen layers
+
+    '''
     # Freeze fully connected layers (e.g., Linear layers)
     for name, module in model.named_modules():
         if isinstance(module, torch.nn.Linear):
@@ -163,18 +235,41 @@ def freeze_fc_layers(model):
                 module.bias.requires_grad = False
             print(f"Frozen {name}.weight and {name}.bias")
 
-# Create an optimizer for the model, excluding frozen parameters
-#source:
-#https://discuss.pytorch.org/t/how-to-set-arguments-of-optimizer-when-loading-a-pretrained-net-with-its-gradient-fix-to-a-new-net/18909
+
 def create_optimizer(model, lr=0.01):
+    '''
+    Create an optimizer for the model, excluding frozen parameters
+    Inspired by the pytorch forum post:
+    https://discuss.pytorch.org/t/how-to-set-arguments-of-optimizer-when-loading-a-pretrained-net-with-its-gradient-fix-to-a-new-net/18909
+    
+    Parameters:
+    model: the model the optimizer is built for, used to make a filter for which parameters to update
+    lr: to set a learning rate to start the scheduler
+
+    Returns:
+    optimizer: the optimizer with the frozen weights removed
+    '''
     # Filter parameters where requires_grad=True
     params_to_update = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = optim.Adam(params_to_update, lr=lr, weight_decay=1e-5)
     return optimizer
 
 
-def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001,unseen_dataloader=None,prune_amount=0.2, model_path=None):
-    
+def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, unseen_dataloader=None,prune_amount=0.2, model_path=None):
+    '''
+    Fine tuning the model after pruning. Uses the same learning methodology as the training.py file
+
+    Parameters:
+    model: the model which is finetuned
+    train_dataloader: the dataloader with the images used for training
+    device: the device the training will be run on
+    num_epochs: max amount of epochs for the trainig
+    lr: override the default learning rate of 0.001
+    unseen_dataloader: the dataloader the model will be tested on to evaluate generalization
+    prune_amount: used for loging performance
+    model_path: the path where the finetuned model will be saved
+
+    '''
     model.train()
     optimizer = create_optimizer(model, lr=lr)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, verbose=True)

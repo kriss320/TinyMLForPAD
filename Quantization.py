@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
 # Dataset Class Definition
+# Defines a dataset which is used in all code-files. 
 #https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
@@ -32,7 +33,6 @@ class CustomImageDataset(Dataset):
         img_path, classification = self.img_classifications[idx]
         image = Image.open(img_path)
         # Convert to RGB if the image is RBGA, since the model expects RGB images (3 channels)
-        # Needed for some images in SynthASpoof
         if image.mode == 'RGBA':
             image = image.convert('RGB')
         if self.transform:
@@ -41,15 +41,39 @@ class CustomImageDataset(Dataset):
             classification = self.target_transform(classification)
         return image, classification
 
-# Function to Get Model Size 
+
 def get_model_size(model, filename="temp.pth"):
+    '''
+    Function to Get Model Size. Works by storing the model, checking the size of it and removing it
+    
+    Parameters:
+    model: model to get the size of
+    filename: temporary filename for the stored model, default temp.pth
+
+    Returns:
+    size: a numerical representation of the size of the model
+    '''
+
+
     torch.save(model.state_dict(), filename)
     size = os.path.getsize(filename)
     os.remove(filename)  # Clean up temporary file
     return size
 
-# Function to Compute APCER and BPCER
 def compute_apcer_bpcer(predictions, labels, threshold=0.5):
+    '''
+    Function to compute the APCER and BPCER with a threshold.
+    Is used by other functions such as find_optimal_threshold
+
+    Parameters
+    Predictions: np.array of the predictions the model has made
+    labels: np.array of the actuall labels of the images
+    threshold= the threshold where images are classified as Bona fide or PAs
+
+    returns:
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
     # Make a binary prediction based on the threshold
     prediction = (predictions >= threshold).astype(int)
     # Count errors 
@@ -63,8 +87,27 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     bpcer = bona_fide_errors / total_bona_fide if total_bona_fide > 0 else 0
     return apcer, bpcer
 
-
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
+    '''
+    Function to Test the Loaded Model to find the optimal threshold
+    Has implemented caching to reduce time spent trying to find the optimal threshold
+    uses a simple binary search method to find the optimal threshold, could be optimized using a smarter search
+
+    Parameters:
+    model: the model which will be used
+    dataloader: the dataloader with the images for testing
+    device: the device the model and dataloader will be run on
+    target_apcer: the apcer which the threshold will be changed to reach
+    precision: the precision needed in the apcer before stoping
+
+    returns:
+    optimal_threshold: the threshold where the apcer is met
+    accuracy: the total classification accuracy at the threshold
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
+
+
     # Compute all predictions once
     model.eval()
     all_predictions, all_labels = [], []
@@ -106,6 +149,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     accuracy = np.mean(predicted_labels == all_labels)
 
     return optimal_threshold, accuracy, apcer, bpcer
+
 
 # Main execution
 if __name__ == '__main__':

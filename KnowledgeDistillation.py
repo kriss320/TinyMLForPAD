@@ -16,6 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 timestr = time.strftime("%Y-%m-%d")
 
 # Dataset Class Definition
+# Defines a dataset which is used in all code-files. 
 #https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
@@ -64,18 +65,44 @@ transform = transforms.Compose([
 #https://docs.pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
 #https://github.com/pvgladkov/knowledge-distillation/blob/master/knowledge_distillation/loss.py
 #https://github.com/haitongli/knowledge-distillation-pytorch/blob/master/model/net.py?utm_source=chatgpt.com
-def distillation_loss(student_outputs, teacher_outputs, labels, alpha=0.5, temperature=3):
-    soft_targets = torch.sigmoid(teacher_outputs / temperature)
+def distillation_loss(student_outputs, teacher_outputs, labels ):
+    '''
+    Defenition of the distillation loss. 
+    will give a loss factor for how good the student model is to predict the teachers output
+    
+    Parameters:
+    student_outputs: the numerical prediction from the student model
+    teacher_outputs: the numerical predictions from a teacher model
+    labels: the correct labels
+
+    returns:
+    the distillation loss which is a prediction on the performance of the student model
+    '''
+
+    soft_targets = torch.sigmoid(teacher_outputs / 3)
     kl_loss = F.kl_div(
-        torch.log_softmax(student_outputs / temperature, dim=1),
+        torch.log_softmax(student_outputs / 3, dim=1),
         soft_targets,
         reduction="batchmean"
-    ) * (temperature ** 2)
+    ) * (3 ** 2)
 
     ground_truth_loss = F.binary_cross_entropy(student_outputs, labels.view(-1, 1).float())
-    return alpha * kl_loss + (1 - alpha) * ground_truth_loss
+    return 0.5 * kl_loss + (1 - 0.5) * ground_truth_loss
 
 def compute_apcer_bpcer(predictions, labels, threshold=0.5):
+    '''
+    Function to compute the APCER and BPCER with a threshold.
+    Is used by other functions such as find_optimal_threshold
+
+    Parameters
+    Predictions: np.array of the predictions the model has made
+    labels: np.array of the actuall labels of the images
+    threshold= the threshold where images are classified as Bona fide or PAs
+
+    returns:
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
     # Make a binary prediction based on the threshold
     prediction = (predictions >= threshold).astype(int)
     # Count errors 
@@ -91,19 +118,35 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
 
 
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
+    '''
+    Function to Test the Loaded Model to find the optimal threshold
+    Has implemented caching to reduce time spent trying to find the optimal threshold
+    uses a simple binary search method to find the optimal threshold, could be optimized using a smarter search
+
+    Parameters:
+    model: the model which will be used
+    dataloader: the dataloader with the images for testing
+    device: the device the model and dataloader will be run on
+    target_apcer: the apcer which the threshold will be changed to reach
+    precision: the precision needed in the apcer before stoping
+
+    returns:
+    optimal_threshold: the threshold where the apcer is met
+    accuracy: the total classification accuracy at the threshold
+    apcer: the apcer at the set threshold
+    bpcer: the bpcer at the set threshold
+    '''
+
+
     # Compute all predictions once
     model.eval()
     all_predictions, all_labels = [], []
     with torch.no_grad():
         for image, labels in dataloader:
-            #move images and labels to gpu if available
             image, labels = image.to(device), labels.to(device)
-            #predict the class of the image
             absolute_prediction = model(image).view(-1).cpu().numpy()
-            # make lists of predictions and labels
             all_predictions.extend(absolute_prediction)
             all_labels.extend(labels.cpu().numpy())
-    #make arrays of all predictions and labels.
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
 
@@ -111,6 +154,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     min_threshold = 0
     max_threshold = 1
     optimal_threshold = None
+    optimal_metrics = None
 
     while max_threshold - min_threshold > precision:
         # Calculate the mid threshold, which will be the new threshold
@@ -128,10 +172,9 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
             max_threshold = mid_threshold
         else:
             min_threshold = mid_threshold
-    # Final threshold
+
     optimal_threshold = (min_threshold + max_threshold) / 2
     predicted_labels = (all_predictions >= optimal_threshold).astype(int)
-    # Calculate the final APCER and BPCER
     apcer, bpcer = compute_apcer_bpcer(predicted_labels, all_labels, optimal_threshold)
     accuracy = np.mean(predicted_labels == all_labels)
 
