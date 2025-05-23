@@ -8,7 +8,6 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torchprofile
 import os
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
 from PIL import Image
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
@@ -16,6 +15,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 import numpy as np
 
 # Dataset Class Definition
+# Defines a dataset which is used in all code-files. 
 #https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
@@ -49,7 +49,8 @@ class CustomImageDataset(Dataset):
         return image, classification
     
 
-# Function to Compute APCER and BPCER
+# Function to compute the APCER and BPCER with a threshold.
+# 
 def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     # Make a binary prediction based on the threshold
     prediction = (predictions >= threshold).astype(int)
@@ -64,41 +65,10 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     bpcer = bona_fide_errors / total_bona_fide if total_bona_fide > 0 else 0
     return apcer, bpcer
 
-# Function to Test the Loaded Model
-def test_model(model, dataloader, device, threshold=0.5):
-    # Set the model to evaluation mode
-    model.eval()
-    correct, total = 0, 0
-    all_predictions, all_labels = [], []
 
-    with torch.no_grad():
-        # Iterate through the DataLoader, and predict the labels
-        for batch_idx, (image, labels) in enumerate(dataloader):
-            image, labels = image.to(device), labels.to(device)
-            absolute_prediction = model(image).view(-1)
-            # Threshold-based predictions
-            predictions = (absolute_prediction >= threshold).float()
-
-            # Accuracy calculation for the batch
-            batch_correct = (predictions == labels.float()).sum().item()
-            batch_total = labels.size(0)
-            batch_accuracy = batch_correct / batch_total
-
-            # Update overall metrics
-            correct += batch_correct
-            total += batch_total
-            all_predictions.extend(predictions.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
-
-
-
-    # Calculate overall metrics
-    accuracy = correct / total
-    apcer, bpcer = compute_apcer_bpcer(np.array(all_predictions), np.array(all_labels), threshold)
-    # Print overall metrics
-    print(f"Overall Accuracy: {accuracy:.2f}, APCER: {apcer:.2f}, BPCER: {bpcer:.2f}")
-
-    return accuracy, apcer, bpcer
+# Function to Test the Loaded Model to find the optimal threshold
+# Has implemented caching to reduce time spent trying to find the optimal threshold
+# requires compute_apcer_bpcer to do the actual computation of the cached predictions
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
     # Compute all predictions once
     model.eval()

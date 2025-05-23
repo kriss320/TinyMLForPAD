@@ -63,41 +63,7 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     bpcer = bona_fide_errors / total_bona_fide if total_bona_fide > 0 else 0
     return apcer, bpcer
 
-# Function to Test the Loaded Model
-def test_model(model, dataloader, device, threshold=0.5):
-    # Set the model to evaluation mode
-    model.eval()
-    correct, total = 0, 0
-    all_predictions, all_labels = [], []
 
-    with torch.no_grad():
-        # Iterate through the DataLoader, and predict the labels
-        for batch_idx, (image, labels) in enumerate(dataloader):
-            image, labels = image.to(device), labels.to(device)
-            absolute_prediction = model(image).view(-1)
-            # Threshold-based predictions
-            predictions = (absolute_prediction >= threshold).float()
-
-            # Accuracy calculation for the batch
-            batch_correct = (predictions == labels.float()).sum().item()
-            batch_total = labels.size(0)
-            batch_accuracy = batch_correct / batch_total
-
-            # Update overall metrics
-            correct += batch_correct
-            total += batch_total
-            all_predictions.extend(predictions.cpu().numpy())
-            all_labels.extend(labels.cpu().numpy())
-
-
-
-    # Calculate overall metrics
-    accuracy = correct / total
-    apcer, bpcer = compute_apcer_bpcer(np.array(all_predictions), np.array(all_labels), threshold)
-    # Print overall metrics
-    print(f"Overall Accuracy: {accuracy:.2f}, APCER: {apcer:.2f}, BPCER: {bpcer:.2f}")
-
-    return accuracy, apcer, bpcer
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
     # Compute all predictions once
     model.eval()
