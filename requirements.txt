@@ -1,0 +1,7 @@
+tortorch --index-url https://download.pytorch.org/whl/cu124 #does not seem to work, has to be done manuallych
+torchvision
+timm
+numpy
+Pillow
+thop
+torchprofile
