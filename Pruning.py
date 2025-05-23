@@ -193,6 +193,8 @@ def freeze_fc_layers(model):
             print(f"Frozen {name}.weight and {name}.bias")
 
 # Create an optimizer for the model, excluding frozen parameters
+#source:
+#https://discuss.pytorch.org/t/how-to-set-arguments-of-optimizer-when-loading-a-pretrained-net-with-its-gradient-fix-to-a-new-net/18909
 def create_optimizer(model, lr=0.01):
     # Filter parameters where requires_grad=True
     params_to_update = filter(lambda p: p.requires_grad, model.parameters())
@@ -205,7 +207,7 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001,uns
     model.train()
     optimizer = create_optimizer(model, lr=lr)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=3, verbose=True)
-    criterion = nn.BCELoss()  # Binary cross-entropy for your Sigmoid output
+    criterion = nn.BCELoss()  # Binary cross-entropy 
     best_unseen_accuracy = 0.0
     # Fine-tuning loop
     for epoch in range(num_epochs):
@@ -235,14 +237,14 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001,uns
 
         params, zero_params, sparcity =calculate_sparsity(model)
         unseen_optimal_threshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(model, unseen_dataloader, device)
-        #store the results in a log file
+        # Store the results in a log file, mainly for debuging purposes
         if unseen_accuracy > best_unseen_accuracy and unseen_accuracy > 0.6:
             with open("pruning.log", 'a') as log:
                 log.write(f"Pruned  {prune_amount *100:.2f}% of weights tested unseen msu ,  epochs -> Accuracy: {unseen_accuracy:.6f}, APCER: {unseen_apcer:.6f}, BPCER: {unseen_bpcer:.6f}, params {params}, zero params {zero_params}, sparcity {sparcity}\n")
                 log.write("\n")
                 log.write("\n")
 
-        #store the model if the accuracy is better than the previous one and 
+        # Store the model if the accuracy is better than the previous one and 
         if unseen_accuracy > best_unseen_accuracy and unseen_apcer < 0.5:
             model_path_temp = model_path + f"_epoch{epoch+1}_pruned-{prune_amount}_sparcity-{sparcity:.2f}_unseen_apcer-{unseen_apcer:.2f}_unseen_bpcer-{unseen_bpcer:.2f}_unseen_accuracy-{unseen_accuracy:.2f}.pth"
             best_unseen_accuracy = unseen_accuracy
@@ -297,7 +299,7 @@ if __name__ == '__main__':
             # Gradually prune 5% more in each step
             prune_amount = prune_step /100
             print(f"\nPruning {prune_amount*100:.2f}% of weights...")
-
+            # Prune the model
             model = prune_model(model, prune_amount)
 
             # Freeze the layers to not change them after pruning
