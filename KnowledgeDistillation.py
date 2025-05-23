@@ -131,10 +131,14 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     all_predictions, all_labels = [], []
     with torch.no_grad():
         for image, labels in dataloader:
+            #move images and labels to gpu if available
             image, labels = image.to(device), labels.to(device)
+            #predict the class of the image
             absolute_prediction = model(image).view(-1).cpu().numpy()
+            # make lists of predictions and labels
             all_predictions.extend(absolute_prediction)
             all_labels.extend(labels.cpu().numpy())
+    #make arrays of all predictions and labels.
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
 
