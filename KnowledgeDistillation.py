@@ -16,6 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 timestr = time.strftime("%Y-%m-%d")
 
 # Dataset Class Definition
+#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
@@ -123,7 +124,7 @@ def test_model(model, dataloader, device, threshold=0.5):
     print(f"Overall Accuracy: {accuracy:.2f}, APCER: {apcer:.2f}, BPCER: {bpcer:.2f}")
 
     return accuracy, apcer, bpcer
-    
+
 def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precision=0.001):
     # Compute all predictions once
     model.eval()

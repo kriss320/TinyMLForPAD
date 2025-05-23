@@ -14,6 +14,7 @@ timestr = time.strftime("%Y-%m-%d")
 
 
 # Dataset Class Definition
+#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
