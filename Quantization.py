@@ -31,6 +31,7 @@ class CustomImageDataset(Dataset):
         img_path, classification = self.img_classifications[idx]
         image = Image.open(img_path)
         # Convert to RGB if the image is RBGA, since the model expects RGB images (3 channels)
+        # Needed for some images in SynthASpoof
         if image.mode == 'RGBA':
             image = image.convert('RGB')
         if self.transform:
@@ -39,10 +40,10 @@ class CustomImageDataset(Dataset):
             classification = self.target_transform(classification)
         return image, classification
 
-# Function to Get Model Size in Bytes
+# Function to Get Model Size 
 def get_model_size(model, filename="temp.pth"):
     torch.save(model.state_dict(), filename)
-    size = os.path.getsize(filename)  # Size in bytes
+    size = os.path.getsize(filename)
     os.remove(filename)  # Clean up temporary file
     return size
 
@@ -196,6 +197,6 @@ if __name__ == '__main__':
     # Find the threshold where the APCER is 10%, this will give the classification accuracy, APCER, and BPCER
     target_apcer = 0.10  # Target APCER of 10%
     optimal_threshold, accuracy, apcer, bpcer = find_optimal_threshold(model, test_dataloader, device, target_apcer=target_apcer)
-
+    # Print the final results
     print(f"\nOptimal Threshold: {optimal_threshold:.4f}")
     print(f"Accuracy: {accuracy:.4f}, APCER: {apcer:.4f}, BPCER: {bpcer:.4f}")
