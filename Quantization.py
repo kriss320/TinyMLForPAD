@@ -151,9 +151,9 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     return optimal_threshold, accuracy, apcer, bpcer
 
 
-# Main execution
+#https://docs.pytorch.org/docs/stable/quantization.html
 if __name__ == '__main__':
-    # Load the model 
+    # Load the trained model 
     model = timm.create_model('efficientnet_b1', pretrained=True)
     num_classes = 1  
     num_features = model.classifier.in_features
@@ -162,8 +162,6 @@ if __name__ == '__main__':
         torch.nn.Linear(num_features, num_classes),
         torch.nn.Sigmoid()
     )
-
-    # Load the trained model
     model.load_state_dict(torch.load("model.pth"))
 
     # Get original model size
@@ -185,7 +183,7 @@ if __name__ == '__main__':
     print(f"Quantized Model Size: {quantized_size} KB")
     print(f"Absolute Size Reduction: {size_diff} KB")
 
-    # Define image transformation to match model's input requirements and make the dataset more varied
+    #Define image transformation to match model's input requirements and make the dataset more varied
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(p=0.5),
@@ -201,7 +199,7 @@ if __name__ == '__main__':
     test_dataset = CustomImageDataset(img_file_path=test_img_path, transform=transform)
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-    # Test the model with the dataset
+    #Test the model with the dataset
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
