@@ -216,7 +216,8 @@ def freeze_conv_layers(model):
             if module.bias is not None:
                 module.bias.requires_grad = False
             print(f"Frozen {name}.weight and {name}.bias")
-#not much use for this one in the efficientnet model, but it is here for other models
+
+#not much use for this one when working with EfficientNet
 def freeze_fc_layers(model):
     '''
     Used to freeze the weights of the fully connected layers in the model so they are not changed during finetuning
