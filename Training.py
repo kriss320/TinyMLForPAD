@@ -158,7 +158,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
 
     return optimal_threshold, accuracy, apcer, bpcer
 
-
+# https://docs.pytorch.org/tutorials/beginner/introyt/trainingyt.html
 if __name__ == '__main__':
     # Path for the training images
     training_dataset_path = ""
