@@ -172,7 +172,8 @@ def calculate_sparsity(model):
     print(f"Sparsity: {sparsity:.4f}")
 
     return total_params, zero_params, sparsity
-
+    
+#https://docs.pytorch.org/tutorials/intermediate/pruning_tutorial.html
 def prune_model(model, prune_amount):
     '''
     Defenition of pruning method. will only prune Conv2d layers and linear layers. 
@@ -255,7 +256,7 @@ def create_optimizer(model, lr=0.01):
     optimizer = optim.Adam(params_to_update, lr=lr, weight_decay=1e-5)
     return optimizer
 
-
+#https://docs.pytorch.org/tutorials/beginner/introyt/trainingyt.html
 def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, unseen_dataloader=None,prune_amount=0.2, model_path=None):
     '''
     Fine tuning the model after pruning. Uses the same learning methodology as the training.py file
@@ -316,7 +317,7 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, un
             model_path_temp = model_path + f"model_name.pth"
             best_unseen_accuracy = unseen_accuracy
             torch.save(model.state_dict(), model_path_temp)
-
+#https://docs.pytorch.org/tutorials/intermediate/pruning_tutorial.html
 if __name__ == '__main__':
     img_file_path = ""
     unseen_img_file_path = ""
