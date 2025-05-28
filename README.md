@@ -1,5 +1,5 @@
 # TinyMLForPAD
-This project uses neural networks to classify images into **Bona Fide** and **Presentation Attacks**. The leading software used is Pytorch and Timm. All code has been created with the help of [Pytorch documentation](https://docs.pytorch.org/docs/stable/index.html), where specific resources have been used to make the code cited above the function. Copilot has been used to help with bugfixing, increased readability and formatting of the code. 
+This project uses neural networks to classify images into **Bona Fide** and **Presentation Attacks**. The leading software used is Pytorch and Timm. All code has been created with the help of [Pytorch documentation](https://docs.pytorch.org/docs/stable/index.html), where specific resources have been used to make the code cited above the function. ChatGPT has been used to help with bugfixing, increased readability and formatting of the code. 
 The choice of different parameters is explained in more detail in the thesis. 
 
 The code is organized into separate files for the methods described in the thesis.
