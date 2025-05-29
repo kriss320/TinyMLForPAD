@@ -48,6 +48,10 @@ class CustomImageDataset(Dataset):
         return image, classification
     
 #Implementaion of early stopping, requires there to be no improvement for 5 rounds to stop the training
+# Inspired by:
+# https://docs.pytorch.org/ignite/generated/ignite.handlers.early_stopping.EarlyStopping.html
+# https://medium.com/biased-algorithms/a-practical-guide-to-implementing-early-stopping-in-pytorch-for-model-training-99a7cbd46e9d
+# https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
 class EarlyStopping:
     def __init__(self, patience=5, min_change=0):
         self.patience = patience
@@ -87,7 +91,7 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     # Count errors 
     attack_errors = np.sum((prediction == 0) & (labels == 1))
     bona_fide_errors = np.sum((prediction == 1) & (labels == 0))
-    # Count total attacks and bona fide
+    # Count total attacks and total bona fide
     total_attacks = np.sum(labels == 1)
     total_bona_fide = np.sum(labels == 0)
     # Calculate APCER and BPCER
@@ -170,7 +174,7 @@ if __name__ == '__main__':
 
     # Standard transformation to make the dataset more robust
     # Resize the images to 224x224, apply random horizontal flip, random rotation, random affine transformation,
-    # color jitter, and normalization
+    # Colour jitter, and normalization
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(p=0.5),
@@ -180,7 +184,7 @@ if __name__ == '__main__':
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-    # Initialize the dataset and dataloarder
+    # Initialize the dataset and dataloader
     dataset = CustomImageDataset(training_dataset_path, transform=transform)
     train_size = int(0.7 * len(dataset))
     test_size = len(dataset) - train_size
