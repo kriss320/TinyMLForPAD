@@ -382,4 +382,3 @@ if __name__ == '__main__':
             unseen_treshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(model, unseen_dataloader, device)
             print(f"Optimal unseen Threshold: {unseen_treshold:.6f}")
             print(f"Final Results unseen -> Accuracy: {unseen_accuracy:.6f}, APCER: {unseen_apcer:.6f}, BPCER: {unseen_bpcer:.6f}")
-

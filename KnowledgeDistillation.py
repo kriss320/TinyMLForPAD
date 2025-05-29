@@ -136,8 +136,6 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     apcer: the apcer at the set threshold
     bpcer: the bpcer at the set threshold
     '''
-
-
     # Compute all predictions once
     model.eval()
     all_predictions, all_labels = [], []
@@ -184,20 +182,27 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
 def main():
     # Load Training Dataset and Split into Train/Validation
     train_data_path = ""
-    full_dataset = CustomImageDataset(train_data_path, transform=transform)
+    train_dataset = CustomImageDataset(train_data_path, transform=transform)
 
+<<<<<<< HEAD
+    # Load Unseen Test Dataset
+=======
     # Splitting dataset:
     train_size = int(0.7 * len(full_dataset))
     val_size = len(full_dataset) - train_size
     train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
 
     # Load unseen test dataset
+>>>>>>> f8c2e18450303005aa3aded9713b63efd34baf22
     test_data_path = ""
     test_dataset = CustomImageDataset(test_data_path, transform=transform)
 
     # Define dataloaders
     train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
+<<<<<<< HEAD
+=======
     val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4) #validation dataset on the same dataset as the training dataset
+>>>>>>> f8c2e18450303005aa3aded9713b63efd34baf22
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
     # Load pre-trained teacher model
@@ -233,14 +238,16 @@ def main():
             optimizer.step()
             running_loss += loss.item()
         best_threshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(student_model, test_dataloader, device)
+        
         if unseen_bpcer < 0.5:
             torch.save(student_model.state_dict(), f"student_model_{timestr}_epoch{epoch}_apcer{unseen_apcer}_bpcer{unseen_bpcer}.pth")
-        avg_train_loss = running_loss / len(train_dataloader)
+        
+
+
         # Test the student model on the evaluation dataset
         print("\nStudent Model Threshold Testing:")
         best_threshold, unseen_accuracy, unseen_apcer, unseen_bpcer = find_optimal_threshold(student_model, test_dataloader, device)
         print(f"Epoch {epoch+1}:")
-        print(f"  Training Loss: {avg_train_loss:.4f}")
         print(f"  Student Model - Optimal Threshold: {best_threshold:.4f}")
         print(f"  Student Model - Accuracy: {unseen_accuracy:.2f}, APCER: {unseen_apcer:.2f}, BPCER: {unseen_bpcer:.2f}")
 
