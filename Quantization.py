@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 # Dataset Class Definition
 # Defines a dataset which is used in all code-files. 
-#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
+#[1]
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
@@ -151,7 +151,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     return optimal_threshold, accuracy, apcer, bpcer
 
 
-#https://docs.pytorch.org/docs/stable/quantization.html
+#[9]
 if __name__ == '__main__':
     # Load the trained model 
     model = timm.create_model('efficientnet_b1', pretrained=True)

@@ -17,7 +17,7 @@ timestr = time.strftime("%Y-%m-%d")
 
 # Dataset Class Definition
 # Defines a dataset which is used in all code-files. 
-#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
+#[1]
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
@@ -62,9 +62,7 @@ transform = transforms.Compose([
 
 
 # Knowledge Distillation Loss, inspired by:
-#https://docs.pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
-#https://github.com/pvgladkov/knowledge-distillation/blob/master/knowledge_distillation/loss.py
-#https://github.com/haitongli/knowledge-distillation-pytorch/blob/master/model/net.py?utm_source=chatgpt.com
+#[6][7][8]
 def distillation_loss(student_outputs, teacher_outputs, labels ):
     '''
     Defenition of the distillation loss. 
@@ -178,7 +176,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
 
     return optimal_threshold, accuracy, apcer, bpcer
     
-#https://docs.pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html
+[9]
 def main():
     # Load Training Dataset and Split into Train/Validation
     train_data_path = ""

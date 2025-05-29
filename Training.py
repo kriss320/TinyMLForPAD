@@ -15,7 +15,7 @@ timestr = time.strftime("%Y-%m-%d")
 
 # Dataset Class Definition
 # Defines a dataset which is used in all code-files. 
-#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
+#[1]
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
@@ -48,10 +48,8 @@ class CustomImageDataset(Dataset):
         return image, classification
     
 #Implementaion of early stopping, requires there to be no improvement for 5 rounds to stop the training
-# Inspired by:
-# https://docs.pytorch.org/ignite/generated/ignite.handlers.early_stopping.EarlyStopping.html
-# https://medium.com/biased-algorithms/a-practical-guide-to-implementing-early-stopping-in-pytorch-for-model-training-99a7cbd46e9d
-# https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch
+# Inspired by:[10][11][12]
+
 class EarlyStopping:
     def __init__(self, patience=5, min_change=0):
         self.patience = patience
@@ -162,7 +160,7 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
 
     return optimal_threshold, accuracy, apcer, bpcer
 
-# https://docs.pytorch.org/tutorials/beginner/introyt/trainingyt.html
+# [5]
 if __name__ == '__main__':
     # Path for the training images
     training_dataset_path = ""

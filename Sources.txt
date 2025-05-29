@@ -1,0 +1,12 @@
+[1] Datasets & DataLoaders,PyTorch, https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html, Last updated 2023-05-31, Last visited 2025-05-29
+[2] Pruning Tutorial, PyTorch, https://docs.pytorch.org/tutorials/intermediate/pruning_tutorial.html, Last updated  2023-11-02, Last visited 2025-04-12
+[3] How the pytorch freeze network in some layers, only the rest of the training?, PyTorch, https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7, Last visited 2025-05-29
+[4] How to set arguments of optimizer() when loading a pretrained net with its gradient fix to a new net.?, PyTorch, https://discuss.pytorch.org/t/how-to-set-arguments-of-optimizer-when-loading-a-pretrained-net-with-its-gradient-fix-to-a-new-net/18909, Last visited 2025-05-29
+[5] Training with PyTorch, PyTorch, https://docs.pytorch.org/tutorials/beginner/introyt/trainingyt.html,Last updated 2023-05-31, Last visited 2025-04-25
+[6] Knowledge Distillation Tutorial, PyTorch, https://docs.pytorch.org/tutorials/beginner/knowledge_distillation_tutorial.html,Last updated 2025-01-24, Last visited 2025-05-10
+[7] knowledge_distillation(cd304ac), pvladkov, https://github.com/pvgladkov/knowledge-distillation/blob/master/knowledge_distillation/loss.py, Last visited 2025-05-02
+[8] knowledge-distillation-pytorch(4af1027),akarle, https://github.com/haitongli/knowledge-distillation-pytorch/blob/master/model/net.py, Last visited 2025-05-29
+[9] Quantization, PyTorch, https://docs.pytorch.org/docs/stable/quantization.html Last visited 2025-03-04
+[10] EarlyStopping, PyTorch,  https://docs.pytorch.org/ignite/generated/ignite.handlers.early_stopping.EarlyStopping.html, Last visited 2025-05-09
+[11] A Practical Guide to Implementing Early Stopping in PyTorch for Model Training, Amit Yadav, Medium,https://medium.com/biased-algorithms/a-practical-guide-to-implementing-early-stopping-in-pytorch-for-model-training-99a7cbd46e9d, Created 2024-10-29, Last visited 2025-04-10
+[12] early stopping in PyTorch, stackoverflow, https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch, Last visited 2025-05-29

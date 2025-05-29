@@ -16,7 +16,7 @@ import numpy as np
 
 # Dataset Class Definition
 # Defines a dataset which is used in all code-files. 
-#https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html
+#[1] 
 class CustomImageDataset(Dataset):
     def __init__(self, training_dataset_path, transform=None, target_transform=None):
         self.training_dataset_path = training_dataset_path
@@ -173,7 +173,7 @@ def calculate_sparsity(model):
 
     return total_params, zero_params, sparsity
     
-#https://docs.pytorch.org/tutorials/intermediate/pruning_tutorial.html
+#[2]
 def prune_model(model, prune_amount):
     '''
     Defenition of pruning method. will only prune Conv2d layers and linear layers. 
@@ -202,8 +202,8 @@ def prune_model(model, prune_amount):
 def freeze_conv_layers(model):
     '''
     Used to freeze the weights of the convolutional layers in the model so they are not changed during finetuning
-    Inspired by the pytorch forum post:
-    https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7
+    Inspired by the pytorch forum post: [3]
+    
     
     Parameters: 
     model: the model which will get frozen layers
@@ -222,8 +222,7 @@ def freeze_conv_layers(model):
 def freeze_fc_layers(model):
     '''
     Used to freeze the weights of the fully connected layers in the model so they are not changed during finetuning
-    Inspired by the pytorch forum post:
-    https://discuss.pytorch.org/t/how-the-pytorch-freeze-network-in-some-layers-only-the-rest-of-the-training/7088/7
+    Inspired by the pytorch forum post:[3]
     
     Parameters: 
     model: the model which will get frozen layers
@@ -241,8 +240,8 @@ def freeze_fc_layers(model):
 def create_optimizer(model, lr=0.01):
     '''
     Create an optimizer for the model, excluding frozen parameters
-    Inspired by the pytorch forum post:
-    https://discuss.pytorch.org/t/how-to-set-arguments-of-optimizer-when-loading-a-pretrained-net-with-its-gradient-fix-to-a-new-net/18909
+    Inspired by the pytorch forum post:[4]
+    
     
     Parameters:
     model: the model the optimizer is built for, used to make a filter for which parameters to update
@@ -256,7 +255,7 @@ def create_optimizer(model, lr=0.01):
     optimizer = optim.Adam(params_to_update, lr=lr, weight_decay=1e-5)
     return optimizer
 
-#https://docs.pytorch.org/tutorials/beginner/introyt/trainingyt.html
+#[5]
 def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, unseen_dataloader=None,prune_amount=0.2, model_path=None):
     '''
     Fine tuning the model after pruning. Uses the same learning methodology as the training.py file
@@ -317,7 +316,7 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, un
             model_path_temp = model_path + f"model_name.pth"
             best_unseen_accuracy = unseen_accuracy
             torch.save(model.state_dict(), model_path_temp)
-#https://docs.pytorch.org/tutorials/intermediate/pruning_tutorial.html
+#[2]
 if __name__ == '__main__':
     img_file_path = ""
     unseen_img_file_path = ""
