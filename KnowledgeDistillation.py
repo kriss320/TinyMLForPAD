@@ -184,25 +184,12 @@ def main():
     train_data_path = ""
     train_dataset = CustomImageDataset(train_data_path, transform=transform)
 
-<<<<<<< HEAD
     # Load Unseen Test Dataset
-=======
-    # Splitting dataset:
-    train_size = int(0.7 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
-    train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
-
-    # Load unseen test dataset
->>>>>>> f8c2e18450303005aa3aded9713b63efd34baf22
     test_data_path = ""
     test_dataset = CustomImageDataset(test_data_path, transform=transform)
 
     # Define dataloaders
     train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
-<<<<<<< HEAD
-=======
-    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4) #validation dataset on the same dataset as the training dataset
->>>>>>> f8c2e18450303005aa3aded9713b63efd34baf22
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
     # Load pre-trained teacher model
