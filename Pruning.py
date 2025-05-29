@@ -69,7 +69,7 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     # Count errors 
     attack_errors = np.sum((prediction == 0) & (labels == 1))
     bona_fide_errors = np.sum((prediction == 1) & (labels == 0))
-    # Count total attacks and bona fide
+    # Count total attacks and total bona fide
     total_attacks = np.sum(labels == 1)
     total_bona_fide = np.sum(labels == 0)
     # Calculate APCER and BPCER
@@ -251,7 +251,7 @@ def create_optimizer(model, lr=0.01):
     Returns:
     optimizer: the optimizer with the frozen weights removed
     '''
-    # Filter parameters where requires_grad=True
+    # Filter parameters where requires_grad=True, works in combination with the freezing above
     params_to_update = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = optim.Adam(params_to_update, lr=lr, weight_decay=1e-5)
     return optimizer
@@ -312,8 +312,8 @@ def fine_tune_model(model, train_dataloader, device, num_epochs=15, lr=0.001, un
                 log.write("\n")
                 log.write("\n")
 
-        # Store the model if the accuracy is better than the previous one and 
-        if unseen_accuracy > best_unseen_accuracy and unseen_apcer < 0.5:
+        # Store the model if the accuracy is better than the previous one and bpcer is lower than 50%
+        if unseen_accuracy > best_unseen_accuracy and unseen_bpcer < 0.5:
             model_path_temp = model_path + f"model_name.pth"
             best_unseen_accuracy = unseen_accuracy
             torch.save(model.state_dict(), model_path_temp)
