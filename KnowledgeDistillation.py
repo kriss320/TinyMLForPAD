@@ -12,7 +12,7 @@ from PIL import Image
 # Device Configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Time for filename consistency
+# Time used in filename
 timestr = time.strftime("%Y-%m-%d")
 
 # Dataset Class Definition
@@ -32,7 +32,7 @@ class CustomImageDataset(Dataset):
                 for img_file in files:
                     img_path = os.path.join(root, img_file)
                     self.img_classifications.append((img_path, classification))
-        np.random.shuffle(self.img_classifications) #shuffle the dataset
+        np.random.shuffle(self.img_classifications) # shuffle the dataset
 
     def __len__(self):
         return len(self.img_classifications)
@@ -108,7 +108,7 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     # Count errors 
     attack_errors = np.sum((prediction == 0) & (labels == 1))
     bona_fide_errors = np.sum((prediction == 1) & (labels == 0))
-    # Count total attacks and bona fide
+    # Count total attacks and total bona fide
     total_attacks = np.sum(labels == 1)
     total_bona_fide = np.sum(labels == 0)
     # Calculate APCER and BPCER
@@ -191,28 +191,28 @@ def main():
     val_size = len(full_dataset) - train_size
     train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
 
-    # Load Unseen Test Dataset
+    # Load unseen test dataset
     test_data_path = ""
     test_dataset = CustomImageDataset(test_data_path, transform=transform)
 
-    # Define Dataloaders
+    # Define dataloaders
     train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
-    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)#validation dataset on the same dataset as the training dataset
+    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4) #validation dataset on the same dataset as the training dataset
     test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
-    # Load Pre-Trained Teacher Model (EfficientNet-B1)
+    # Load pre-trained teacher model
     teacher_model = timm.create_model('efficientnet_b1', pretrained=False)
     teacher_model.classifier = nn.Sequential(nn.Dropout(0.5), nn.Linear(1280, 1), nn.Sigmoid())
     teacher_model.load_state_dict(torch.load("model.pth"))
     teacher_model.to(device)
-    teacher_model.eval()  # Freeze the teacher model
+    teacher_model.eval()  # freeze the teacher model
 
-    # Define Student Model (EfficientNet-B0)
+    # Define student model 
     student_model = timm.create_model('efficientnet_b0', pretrained=True)
     student_model.classifier = nn.Sequential(nn.Dropout(0.5), nn.Linear(1280, 1), nn.Sigmoid())
     student_model.to(device)
 
-    # Training Loop with Unseen Data Testing
+    # Training loop with unseen data testing
     criterion = distillation_loss
     optimizer = torch.optim.Adam(student_model.parameters(), lr=0.001, weight_decay=0.0001)
     #15 epochs trainig loop
