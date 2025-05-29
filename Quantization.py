@@ -79,7 +79,7 @@ def compute_apcer_bpcer(predictions, labels, threshold=0.5):
     # Count errors 
     attack_errors = np.sum((prediction == 0) & (labels == 1))
     bona_fide_errors = np.sum((prediction == 1) & (labels == 0))
-    # Count total attacks and bona fide
+    # Count total attacks and total bona fide
     total_attacks = np.sum(labels == 1)
     total_bona_fide = np.sum(labels == 0)
     # Calculate APCER and BPCER
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     print(f"Quantized Model Size: {quantized_size} KB")
     print(f"Absolute Size Reduction: {size_diff} KB")
 
-    #Define image transformation to match model's input requirements and make the dataset more varied
+    #Define image transformation to match model's input(224x224) and make the dataset more varied
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(p=0.5),
