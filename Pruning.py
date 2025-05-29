@@ -47,7 +47,18 @@ class CustomImageDataset(Dataset):
         if self.target_transform:
             classification = self.target_transform(classification)
         return image, classification
-    
+# Standard transformation to make the dataset more robust
+# Resize the images to 224x224, apply random horizontal flip, random rotation, random affine transformation,
+# color jitter, and normalization
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(10),
+    transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
 
 
 def compute_apcer_bpcer(predictions, labels, threshold=0.5):
@@ -106,8 +117,8 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     with torch.no_grad():
         for image, labels in dataloader:
             image, labels = image.to(device), labels.to(device)
-            absolute_prediction = model(image).view(-1).cpu().numpy()
-            all_predictions.extend(absolute_prediction)
+            absolute_prediction = model(image).view(-1)
+            all_predictions.extend(absolute_prediction.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
@@ -321,18 +332,7 @@ if __name__ == '__main__':
     img_file_path = ""
     unseen_img_file_path = ""
     
-    # Standard transformation to make the dataset more robust
-    # Resize the images to 224x224, apply random horizontal flip, random rotation, random affine transformation,
-    # color jitter, and normalization
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(10),
-        transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
+    
     # Set up the dataset and dataloader
     dataset = CustomImageDataset(img_file_path, transform=transform)
     train_size = int(0.7 * len(dataset))

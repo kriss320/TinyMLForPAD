@@ -40,7 +40,16 @@ class CustomImageDataset(Dataset):
         if self.target_transform:
             classification = self.target_transform(classification)
         return image, classification
-
+#Define image transformation to match model's input(224x224) and make the dataset more varied
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.RandomHorizontalFlip(p=0.5),
+    transforms.RandomRotation(10),
+    transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
 
 def get_model_size(model, filename="temp.pth"):
     '''
@@ -114,8 +123,8 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     with torch.no_grad():
         for image, labels in dataloader:
             image, labels = image.to(device), labels.to(device)
-            absolute_prediction = model(image).view(-1).cpu().numpy()
-            all_predictions.extend(absolute_prediction)
+            absolute_prediction = model(image).view(-1)
+            all_predictions.extend(absolute_prediction.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
@@ -182,17 +191,6 @@ if __name__ == '__main__':
     print(f"\nOriginal Model Size: {original_size} KB")
     print(f"Quantized Model Size: {quantized_size} KB")
     print(f"Absolute Size Reduction: {size_diff} KB")
-
-    #Define image transformation to match model's input(224x224) and make the dataset more varied
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(10),
-        transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
 
     # Set up the dataset and dataloader for testing
     test_img_path = ""  # Path to test images

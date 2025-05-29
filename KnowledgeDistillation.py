@@ -140,8 +140,8 @@ def find_optimal_threshold(model, dataloader, device, target_apcer=0.10, precisi
     with torch.no_grad():
         for image, labels in dataloader:
             image, labels = image.to(device), labels.to(device)
-            absolute_prediction = model(image).view(-1).cpu().numpy()
-            all_predictions.extend(absolute_prediction)
+            absolute_prediction = model(image).view(-1)
+            all_predictions.extend(absolute_prediction.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
     all_predictions = np.array(all_predictions)
     all_labels = np.array(all_labels)
