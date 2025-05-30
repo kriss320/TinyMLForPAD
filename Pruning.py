@@ -50,6 +50,7 @@ class CustomImageDataset(Dataset):
 # Standard transformation to make the dataset more robust
 # Resize the images to 224x224, apply random horizontal flip, random rotation, random affine transformation,
 # color jitter, and normalization
+#[13]
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),

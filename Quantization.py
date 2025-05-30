@@ -41,6 +41,7 @@ class CustomImageDataset(Dataset):
             classification = self.target_transform(classification)
         return image, classification
 #Define image transformation to match model's input(224x224) and make the dataset more varied
+#[13]
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(p=0.5),
