@@ -50,7 +50,7 @@ class CustomImageDataset(Dataset):
         return image, classification
 
 # Data Transforms
-#[13]
+#[13][14]
 transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.RandomHorizontalFlip(p=0.5),

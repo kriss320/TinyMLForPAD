@@ -11,3 +11,4 @@
 [11] A Practical Guide to Implementing Early Stopping in PyTorch for Model Training, Amit Yadav, Medium,https://medium.com/biased-algorithms/a-practical-guide-to-implementing-early-stopping-in-pytorch-for-model-training-99a7cbd46e9d, Created 2024-10-29, Last visited 2025-04-10
 [12] early stopping in PyTorch, stackoverflow, https://stackoverflow.com/questions/71998978/early-stopping-in-pytorch, Last visited 2025-05-29
 [13] torchvision.transforms, PyTorch, https://docs.pytorch.org/vision/0.11/transforms.html, Last visited 2025-05-30
+[14] Face-Anti-spoofing.pytorch, github, https://github.com/deepcam-cn/Face-Anti-spoofing.pytorch, Last visited 2025-05-30
